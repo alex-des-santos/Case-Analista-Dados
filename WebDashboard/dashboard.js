@@ -506,6 +506,15 @@ class DashboardData {
             });
         }
 
+        // Power BI Export Button
+        const powerBIExportBtn = document.getElementById('powerBIExportBtn');
+        if (powerBIExportBtn) {
+            powerBIExportBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.exportPowerBIFile();
+            });
+        }
+
         // Share Button
         const shareBtn = document.getElementById('shareBtn');
         if (shareBtn) {
@@ -1086,6 +1095,776 @@ class DashboardData {
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
         }, 3000);
+    }
+
+    // Exportação estruturada para Power BI
+    exportToPowerBIStructure() {
+        const currentDate = new Date().toISOString();
+        
+        const powerBIStructure = {
+            metadata: {
+                title: "Adventure Works - Power BI Export",
+                exportedAt: currentDate,
+                source: "Web Dashboard",
+                version: "1.0",
+                description: "Estrutura completa para replicação no Power BI"
+            },
+            
+            // 1. TABELAS DE DADOS (para importar como fontes de dados)
+            dataTables: {
+                // Tabela de KPIs principais
+                kpi_metrics: [
+                    {
+                        metric_name: "Receita Total",
+                        metric_value: this.data.revenue.total,
+                        metric_change: this.data.revenue.change,
+                        metric_type: "Currency",
+                        metric_category: "Financial"
+                    },
+                    {
+                        metric_name: "Lucro Total", 
+                        metric_value: this.data.profit.total,
+                        metric_change: this.data.profit.change,
+                        metric_type: "Currency",
+                        metric_category: "Financial"
+                    },
+                    {
+                        metric_name: "Total de Pedidos",
+                        metric_value: this.data.orders.total,
+                        metric_change: this.data.orders.change,
+                        metric_type: "Number",
+                        metric_category: "Sales"
+                    },
+                    {
+                        metric_name: "Margem de Lucro",
+                        metric_value: this.data.margin.total,
+                        metric_change: this.data.margin.change,
+                        metric_type: "Percentage",
+                        metric_category: "Financial"
+                    },
+                    {
+                        metric_name: "Ticket Médio",
+                        metric_value: this.data.averageTicket.total,
+                        metric_change: this.data.averageTicket.change,
+                        metric_type: "Currency",
+                        metric_category: "Sales"
+                    }
+                ],
+                
+                // Tabela de receita mensal (dados reais dos CSVs)
+                monthly_revenue: this.generateMonthlyRevenueTable(),
+                
+                // Tabela de produtos top
+                top_products: this.rawData.allYearsData.products.map((product, index) => ({
+                    product_name: product,
+                    sales_value: this.rawData.allYearsData.productSales[index],
+                    rank: index + 1,
+                    category: this.getProductCategory(product)
+                })),
+                
+                // Tabela de territórios
+                territory_sales: this.rawData.allYearsData.territories.map((territory, index) => ({
+                    territory_name: territory,
+                    sales_value: this.rawData.allYearsData.territorySales[index],
+                    percentage: ((this.rawData.allYearsData.territorySales[index] / this.data.revenue.total) * 100).toFixed(1)
+                })),
+                
+                // Tabela de categorias
+                category_performance: this.rawData.allYearsData.categories.map((category, index) => ({
+                    category_name: category,
+                    revenue: this.rawData.allYearsData.categoryRevenue[index],
+                    profit: this.rawData.allYearsData.categoryProfit[index],
+                    margin: ((this.rawData.allYearsData.categoryProfit[index] / this.rawData.allYearsData.categoryRevenue[index]) * 100).toFixed(1)
+                }))
+            },
+            
+            // 2. MEDIDAS DAX (para copiar no Power BI)
+            daxMeasures: {
+                // Medidas principais
+                primary_measures: [
+                    {
+                        name: "Receita Total",
+                        dax: "Receita Total = SUMX(fat_Sales_Data, fat_Sales_Data[OrderQuantity] * RELATED(fat_Product[ProductPrice]))",
+                        description: "Fórmula exata usada no Power BI original"
+                    },
+                    {
+                        name: "Lucro Total", 
+                        dax: "Lucro Total = [Receita Total] - SUMX(fat_Sales_Data, fat_Sales_Data[OrderQuantity] * RELATED(fat_Product[ProductCost]))",
+                        description: "Lucro calculado com base nos custos reais"
+                    },
+                    {
+                        name: "Margem de Lucro",
+                        dax: "Margem de Lucro = DIVIDE([Lucro Total], [Receita Total], 0) * 100",
+                        description: "Margem percentual"
+                    },
+                    {
+                        name: "Ticket Médio",
+                        dax: "Ticket Médio = DIVIDE([Receita Total], COUNTROWS(fat_Sales_Data))",
+                        description: "Receita média por transação"
+                    },
+                    {
+                        name: "Total de Pedidos",
+                        dax: "Total de Pedidos = COUNTROWS(fat_Sales_Data)",
+                        description: "Contagem total de registros de vendas"
+                    }
+                ],
+                
+                // Medidas auxiliares
+                auxiliary_measures: [
+                    {
+                        name: "Receita Anterior",
+                        dax: "Receita Anterior = CALCULATE([Receita Total], PREVIOUSYEAR(fat_Sales_Data[OrderDate]))",
+                        description: "Para cálculo de variação"
+                    },
+                    {
+                        name: "Crescimento Receita",
+                        dax: "Crescimento Receita = DIVIDE([Receita Total] - [Receita Anterior], [Receita Anterior], 0) * 100",
+                        description: "Crescimento percentual year-over-year"
+                    }
+                ]
+            },
+            
+            // 3. ESTRUTURA DE VISUAIS (layout para replicar)
+            visualsStructure: {
+                page1: {
+                    name: "Overview",
+                    visuals: [
+                        {
+                            type: "Card",
+                            title: "Receita Total",
+                            measure: "Receita Total",
+                            format: "Currency",
+                            position: { x: 0, y: 0, width: 200, height: 100 }
+                        },
+                        {
+                            type: "Card", 
+                            title: "Lucro Total",
+                            measure: "Lucro Total",
+                            format: "Currency",
+                            position: { x: 200, y: 0, width: 200, height: 100 }
+                        },
+                        {
+                            type: "Card",
+                            title: "Total de Pedidos", 
+                            measure: "Total de Pedidos",
+                            format: "Number",
+                            position: { x: 400, y: 0, width: 200, height: 100 }
+                        },
+                        {
+                            type: "Card",
+                            title: "Margem de Lucro",
+                            measure: "Margem de Lucro", 
+                            format: "Percentage",
+                            position: { x: 600, y: 0, width: 200, height: 100 }
+                        },
+                        {
+                            type: "Card",
+                            title: "Ticket Médio",
+                            measure: "Ticket Médio",
+                            format: "Currency", 
+                            position: { x: 800, y: 0, width: 200, height: 100 }
+                        },
+                        {
+                            type: "Line Chart",
+                            title: "Evolução da Receita",
+                            axis: "fat_Sales_Data[OrderDate]",
+                            values: "Receita Total",
+                            position: { x: 0, y: 120, width: 500, height: 300 }
+                        },
+                        {
+                            type: "Bar Chart",
+                            title: "Top Produtos",
+                            axis: "fat_Product[ProductName]",
+                            values: "Receita Total",
+                            position: { x: 520, y: 120, width: 480, height: 300 }
+                        },
+                        {
+                            type: "Donut Chart",
+                            title: "Vendas por Território",
+                            legend: "Territory[TerritoryName]", 
+                            values: "Receita Total",
+                            position: { x: 0, y: 440, width: 300, height: 250 }
+                        },
+                        {
+                            type: "Clustered Bar Chart",
+                            title: "Performance por Categoria",
+                            axis: "ProductCategory[CategoryName]",
+                            values: ["Receita Total", "Lucro Total"],
+                            position: { x: 320, y: 440, width: 680, height: 250 }
+                        }
+                    ]
+                }
+            },
+            
+            // 4. CONFIGURAÇÕES DE FORMATAÇÃO
+            formatting: {
+                theme: {
+                    primaryColor: "#336BFF",
+                    secondaryColor: "#339966", 
+                    accentColor: "#007AFF",
+                    backgroundColor: "#FFFFFF",
+                    textColor: "#2D3748"
+                },
+                numberFormats: {
+                    currency: {
+                        symbol: "$",
+                        decimalPlaces: 0,
+                        thousandsSeparator: true,
+                        displayUnits: "Millions"
+                    },
+                    percentage: {
+                        decimalPlaces: 1,
+                        symbol: "%"
+                    }
+                }
+            },
+            
+            // 5. RELACIONAMENTOS SUGERIDOS (caso precise criar)
+            relationships: [
+                {
+                    from: "fat_Sales_Data[ProductKey]",
+                    to: "fat_Product[ProductKey]", 
+                    type: "Many-to-One",
+                    crossFilter: "Single"
+                },
+                {
+                    from: "fat_Sales_Data[CustomerKey]",
+                    to: "Customer[CustomerKey]",
+                    type: "Many-to-One", 
+                    crossFilter: "Single"
+                },
+                {
+                    from: "fat_Sales_Data[TerritoryKey]",
+                    to: "Territory[TerritoryKey]",
+                    type: "Many-to-One",
+                    crossFilter: "Single"
+                }
+            ]
+        };
+        
+        return powerBIStructure;
+    }
+
+    // Gerar tabela de receita mensal estruturada
+    generateMonthlyRevenueTable() {
+        const monthlyData = [];
+        const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        
+        Object.keys(this.rawData.revenueByYear).forEach(year => {
+            this.rawData.revenueByYear[year].forEach((value, monthIndex) => {
+                if (value > 0) { // Só incluir meses com dados
+                    monthlyData.push({
+                        year: parseInt(year),
+                        month_number: monthIndex + 1,
+                        month_name: months[monthIndex],
+                        year_month: `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`,
+                        revenue: value,
+                        quarter: Math.ceil((monthIndex + 1) / 3),
+                        quarter_name: `Q${Math.ceil((monthIndex + 1) / 3)} ${year}`
+                    });
+                }
+            });
+        });
+        
+        return monthlyData;
+    }
+
+    // Obter categoria do produto (simulado)
+    getProductCategory(productName) {
+        if (productName.includes('Mountain') || productName.includes('Road')) {
+            return 'Bikes';
+        } else if (productName.includes('Component')) {
+            return 'Components';
+        } else if (productName.includes('Clothing')) {
+            return 'Clothing';
+        } else {
+            return 'Accessories';
+        }
+    }
+
+    // Exportar arquivo JSON para Power BI
+    exportPowerBIFile() {
+        this.addLoadingState();
+        
+        setTimeout(() => {
+            const powerBIStructure = this.exportToPowerBIStructure();
+            
+            // Criar arquivo JSON principal
+            this.downloadJSON(powerBIStructure, 'adventure-works-powerbi-structure.json');
+            
+            // Criar arquivo CSV das tabelas principais
+            this.downloadCSVTables(powerBIStructure.dataTables);
+            
+            // Criar arquivo de medidas DAX
+            this.downloadDAXFile(powerBIStructure.daxMeasures);
+            
+            // Criar arquivo de configuração específico do Power BI
+            this.downloadPowerBIConfig();
+            
+            // Criar arquivo README com instruções detalhadas
+            this.downloadPowerBIReadme();
+            
+            this.removeLoadingState();
+            this.showNotification('Todos os arquivos para Power BI foram exportados com sucesso!');
+            
+            // Mostrar instruções melhoradas
+            this.showPowerBIInstructions();
+        }, 1500);
+    }
+
+    // Criar arquivo de configuração específico para Power BI
+    downloadPowerBIConfig() {
+        const config = {
+            powerBISettings: {
+                dataSource: {
+                    connectionString: "CSV Files from Adventure Works Dashboard",
+                    refreshRate: "Daily",
+                    dataRetention: "3 years"
+                },
+                visualTheme: {
+                    primaryColor: "#336BFF",
+                    secondaryColor: "#339966",
+                    accentColor: "#007AFF",
+                    backgroundColor: "#FFFFFF",
+                    fontFamily: "Segoe UI",
+                    fontSize: {
+                        title: 16,
+                        subtitle: 14,
+                        body: 12
+                    }
+                },
+                dashboardLayout: {
+                    pageSize: "16:9",
+                    margins: {
+                        top: 20,
+                        bottom: 20,
+                        left: 20,
+                        right: 20
+                    },
+                    gridSize: {
+                        width: 1000,
+                        height: 700
+                    }
+                },
+                filters: {
+                    defaultFilters: [
+                        {
+                            column: "Year",
+                            type: "Dropdown",
+                            defaultValue: "All"
+                        },
+                        {
+                            column: "Territory",
+                            type: "Dropdown",
+                            defaultValue: "All"
+                        },
+                        {
+                            column: "ProductCategory",
+                            type: "Dropdown",
+                            defaultValue: "All"
+                        }
+                    ]
+                },
+                kpiTargets: {
+                    revenue: {
+                        target: this.data.revenue.total * 1.1,
+                        format: "Currency",
+                        indicator: "Gauge"
+                    },
+                    profit: {
+                        target: this.data.profit.total * 1.15,
+                        format: "Currency",
+                        indicator: "Gauge"
+                    },
+                    margin: {
+                        target: 25,
+                        format: "Percentage",
+                        indicator: "KPI"
+                    }
+                }
+            }
+        };
+        
+        this.downloadJSON(config, 'adventure-works-powerbi-config.json');
+    }
+
+    // Criar arquivo README detalhado
+    downloadPowerBIReadme() {
+        const readme = `# Adventure Works - Importação para Power BI
+
+## 📊 Visão Geral
+Este pacote contém todos os arquivos necessários para replicar o dashboard web Adventure Works no Power BI Desktop.
+
+## 📁 Arquivos Incluídos
+- \`adventure-works-powerbi-structure.json\` - Estrutura completa do dashboard
+- \`adventure-works-powerbi-config.json\` - Configurações específicas do Power BI
+- \`adventure-works-dax-measures.txt\` - Medidas DAX prontas para uso
+- \`kpi_metrics.csv\` - Dados dos KPIs principais
+- \`monthly_revenue.csv\` - Receita mensal detalhada
+- \`top_products.csv\` - Produtos mais vendidos
+- \`territory_sales.csv\` - Vendas por território
+- \`category_performance.csv\` - Performance por categoria
+- \`README.md\` - Este arquivo de instruções
+
+## 🚀 Guia de Importação Rápida
+
+### Passo 1: Preparar o Power BI
+1. Abra o Power BI Desktop
+2. Crie um novo relatório ou abra seu arquivo Adventure_Works.pbix existente
+3. Vá para a aba "Modelagem"
+
+### Passo 2: Importar Dados
+1. **Página Inicial > Obter Dados > Texto/CSV**
+2. Importe os seguintes arquivos em ordem:
+   - \`kpi_metrics.csv\` (tabela de KPIs)
+   - \`monthly_revenue.csv\` (dados temporais)
+   - \`top_products.csv\` (produtos)
+   - \`territory_sales.csv\` (territórios)
+   - \`category_performance.csv\` (categorias)
+
+### Passo 3: Criar Medidas DAX
+1. Abra o arquivo \`adventure-works-dax-measures.txt\`
+2. Para cada medida:
+   - Clique em "Nova Medida" na fita
+   - Copie e cole a fórmula DAX
+   - Ajuste os nomes das tabelas se necessário
+
+**Medidas principais a criar:**
+- Receita Total
+- Lucro Total  
+- Margem de Lucro
+- Ticket Médio
+- Total de Pedidos
+
+### Passo 4: Construir Visuais
+
+#### KPIs Principais (Cartões)
+Crie 5 cartões na parte superior:
+1. **Receita Total** - Medida: Receita Total
+2. **Lucro Total** - Medida: Lucro Total
+3. **Total de Pedidos** - Medida: Total de Pedidos
+4. **Margem de Lucro** - Medida: Margem de Lucro
+5. **Ticket Médio** - Medida: Ticket Médio
+
+#### Gráficos Principais
+1. **Gráfico de Linhas** - Evolução da Receita
+   - Eixo: monthly_revenue[year_month]
+   - Valores: Receita Total
+   
+2. **Gráfico de Barras** - Top Produtos
+   - Eixo: top_products[product_name]
+   - Valores: top_products[sales_value]
+   
+3. **Gráfico de Rosca** - Vendas por Território
+   - Legenda: territory_sales[territory_name]
+   - Valores: territory_sales[sales_value]
+   
+4. **Gráfico de Barras Agrupadas** - Performance por Categoria
+   - Eixo: category_performance[category_name]
+   - Valores: category_performance[revenue], category_performance[profit]
+
+### Passo 5: Aplicar Formatação
+
+#### Cores do Tema
+- **Primária**: #336BFF (Azul Adventure Works)
+- **Secundária**: #339966 (Verde Lucro)
+- **Destaque**: #007AFF (Azul Claro)
+- **Fundo**: #FFFFFF (Branco)
+
+#### Formatos de Número
+- **Moeda**: $ com separador de milhares, sem casas decimais
+- **Percentual**: 1 casa decimal, símbolo %
+- **Números**: Separador de milhares
+
+### Passo 6: Configurar Filtros
+1. Adicione filtros de página para:
+   - Ano (monthly_revenue[year])
+   - Território (territory_sales[territory_name])
+   - Categoria (category_performance[category_name])
+
+## 🔧 Configurações Avançadas
+
+### Relacionamentos
+Se usando dados existentes, certifique-se de manter os relacionamentos:
+- Sales Data → Product (ProductKey)
+- Sales Data → Customer (CustomerKey)
+- Sales Data → Territory (TerritoryKey)
+
+### Atualização de Dados
+- Configure atualização automática diária
+- Mantenha conexão com os arquivos CSV atualizados
+
+### Performance
+- Use colunas calculadas para campos frequentemente filtrados
+- Considere criar hierarquias de data para análise temporal
+
+## 📈 Validação dos Dados
+
+Após importação, valide se os valores batem com o dashboard web:
+- ✅ Receita Total: ${this.formatCurrency(this.data.revenue.total)}
+- ✅ Lucro Total: ${this.formatCurrency(this.data.profit.total)}
+- ✅ Total de Pedidos: ${this.formatNumber(this.data.orders.total)}
+- ✅ Margem de Lucro: ${this.data.margin.total}%
+- ✅ Ticket Médio: ${this.formatCurrency(this.data.averageTicket.total)}
+
+## 🆘 Suporte
+
+Se encontrar problemas:
+1. Verifique se os nomes das tabelas estão corretos nas medidas DAX
+2. Confirme se todos os arquivos CSV foram importados
+3. Validate se os relacionamentos estão configurados
+4. Teste com dados de apenas um ano primeiro
+
+## 📄 Referências
+- Arquivo JSON contém layout completo de referência
+- Arquivo de config tem todas as configurações de tema
+- Dashboard web original: Adventure Works Executive Dashboard
+
+---
+Exportado automaticamente do Adventure Works Dashboard Web
+Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}
+`;
+
+        const blob = new Blob([readme], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'README.md';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Download das tabelas em CSV  
+    downloadCSVTables(dataTables) {
+        Object.keys(dataTables).forEach(tableName => {
+            const data = dataTables[tableName];
+            if (Array.isArray(data) && data.length > 0) {
+                const csv = this.convertToCSV(data);
+                this.downloadCSV(csv, `${tableName}.csv`);
+            }
+        });
+    }
+
+    // Converter dados para CSV
+    convertToCSV(data) {
+        if (!data || data.length === 0) return '';
+        
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => 
+                headers.map(header => {
+                    let value = row[header];
+                    if (typeof value === 'string' && value.includes(',')) {
+                        value = `"${value}"`;
+                    }
+                    return value;
+                }).join(',')
+            )
+        ].join('\n');
+        
+        return csvContent;
+    }
+
+    // Download CSV
+    downloadCSV(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Download arquivo DAX
+    downloadDAXFile(daxMeasures) {
+        let daxContent = '// Adventure Works - Medidas DAX\n';
+        daxContent += '// Exportado do Dashboard Web\n\n';
+        
+        Object.keys(daxMeasures).forEach(category => {
+            daxContent += `// === ${category.toUpperCase()} ===\n\n`;
+            daxMeasures[category].forEach(measure => {
+                daxContent += `// ${measure.description}\n`;
+                daxContent += `${measure.dax}\n\n`;
+            });
+        });
+        
+        const blob = new Blob([daxContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'adventure-works-dax-measures.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Mostrar instruções para Power BI
+    showPowerBIInstructions() {
+        // Criar um modal mais elegante com instruções detalhadas
+        const modal = document.createElement('div');
+        modal.id = 'powerBIInstructionsModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        `;
+
+        modalContent.innerHTML = `
+            <button id="closeModal" style="
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+            ">×</button>
+            
+            <h2 style="color: #336BFF; margin-bottom: 20px; display: flex; align-items: center;">
+                <i class="fas fa-chart-bar" style="margin-right: 10px;"></i>
+                Exportação para Power BI Concluída!
+            </h2>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="color: #28a745; margin: 0 0 10px 0;">
+                    <i class="fas fa-check-circle"></i> Arquivos Gerados:
+                </h3>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                    <li><strong>adventure-works-powerbi-structure.json</strong> - Estrutura completa do dashboard</li>
+                    <li><strong>kpi_metrics.csv</strong> - Dados dos KPIs principais</li>
+                    <li><strong>monthly_revenue.csv</strong> - Receita mensal detalhada</li>
+                    <li><strong>top_products.csv</strong> - Produtos mais vendidos</li>
+                    <li><strong>territory_sales.csv</strong> - Vendas por território</li>
+                    <li><strong>category_performance.csv</strong> - Performance por categoria</li>
+                    <li><strong>adventure-works-dax-measures.txt</strong> - Medidas DAX prontas</li>
+                </ul>
+            </div>
+            
+            <div style="border-left: 4px solid #336BFF; padding-left: 15px; margin-bottom: 20px;">
+                <h3 style="color: #336BFF; margin: 0 0 15px 0;">📋 Passos para Importar no Power BI:</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #495057; margin: 0 0 8px 0;">1️⃣ Importar Dados:</h4>
+                    <p style="margin: 0; color: #666; line-height: 1.6;">
+                        • Abra o Power BI Desktop<br>
+                        • Vá em <strong>Página Inicial > Obter Dados > Texto/CSV</strong><br>
+                        • Importe todos os arquivos CSV gerados<br>
+                        • Use seus dados existentes como base principal
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #495057; margin: 0 0 8px 0;">2️⃣ Criar Medidas DAX:</h4>
+                    <p style="margin: 0; color: #666; line-height: 1.6;">
+                        • Abra o arquivo <strong>adventure-works-dax-measures.txt</strong><br>
+                        • Copie cada medida DAX<br>
+                        • No Power BI: <strong>Página Inicial > Nova Medida</strong><br>
+                        • Cole as fórmulas DAX (ajuste nomes das tabelas se necessário)
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #495057; margin: 0 0 8px 0;">3️⃣ Criar Visuais:</h4>
+                    <p style="margin: 0; color: #666; line-height: 1.6;">
+                        • Use o JSON como referência para layout<br>
+                        • Crie 5 cartões para os KPIs (Receita, Lucro, Pedidos, Margem, Ticket Médio)<br>
+                        • Adicione gráfico de linhas, barras e rosca conforme especificado<br>
+                        • Configure filtros por ano e moeda
+                    </p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #495057; margin: 0 0 8px 0;">4️⃣ Aplicar Formatação:</h4>
+                    <p style="margin: 0; color: #666; line-height: 1.6;">
+                        • Use as cores do tema: #336BFF (principal), #339966 (secundária)<br>
+                        • Configure formatos de moeda ($ para milhões)<br>
+                        • Aplique formatação percentual para margem
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h4 style="color: #856404; margin: 0 0 10px 0;">
+                    <i class="fas fa-lightbulb"></i> Dicas Importantes:
+                </h4>
+                <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
+                    <li>Os valores foram calculados com a fórmula exata: <strong>OrderQuantity × ProductPrice</strong></li>
+                    <li>Use o arquivo JSON como referência completa da estrutura</li>
+                    <li>Mantenha os relacionamentos entre as tabelas existentes</li>
+                    <li>Configure filtros de data para análise temporal</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <button id="closeModalBtn" style="
+                    background: #336BFF;
+                    color: white;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 500;
+                ">Entendi, Vamos ao Power BI! 🚀</button>
+            </div>
+        `;
+
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Event listeners para fechar o modal
+        const closeModal = () => {
+            modal.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                document.body.removeChild(modal);
+            }, 300);
+        };
+
+        modal.querySelector('#closeModal').addEventListener('click', closeModal);
+        modal.querySelector('#closeModalBtn').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Adicionar animações CSS
+        if (!document.querySelector('#powerBIModalStyles')) {
+            const style = document.createElement('style');
+            style.id = 'powerBIModalStyles';
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; transform: scale(1); }
+                    to { opacity: 0; transform: scale(0.9); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 
