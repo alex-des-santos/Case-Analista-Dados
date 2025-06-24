@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Works - Dashboard Power BI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../WebDashboard/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos otimizados para embedding no Power BI */
+        body {
+            margin: 0;
+            padding: 10px;
+            background: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .powerbi-optimized {
+            max-width: 100%;
+            background: white;
+        }
+        
+        .dashboard-header {
+            background: white;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 20px;
+            padding: 15px 0;
+        }
+        
+        .kpi-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .kpi-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .chart-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Remover elementos não necessários para Power BI */
+        .currency-controls,
+        .refresh-btn,
+        .export-btn,
+        .share-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container powerbi-optimized">
+        <!-- Header Simplificado -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-bicycle"></i>
+                    <h1>Adventure Works</h1>
+                    <span class="subtitle">Dashboard Executivo</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI Cards Otimizados -->
+        <section class="kpi-section">
+            <div class="kpi-grid">
+                <div class="kpi-card revenue">
+                    <div class="kpi-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Receita Total</h3>
+                        <div class="kpi-value" id="totalRevenue">$0</div>
+                        <div class="kpi-change positive" id="revenueChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card profit">
+                    <div class="kpi-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Lucro Total</h3>
+                        <div class="kpi-value" id="totalProfit">$0</div>
+                        <div class="kpi-change positive" id="profitChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card orders">
+                    <div class="kpi-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Total de Pedidos</h3>
+                        <div class="kpi-value" id="totalOrders">0</div>
+                        <div class="kpi-change positive" id="ordersChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card margin">
+                    <div class="kpi-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Margem de Lucro</h3>
+                        <div class="kpi-value" id="profitMargin">0%</div>
+                        <div class="kpi-change positive" id="marginChange">+0%</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card ticket">
+                    <div class="kpi-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Ticket Médio</h3>
+                        <div class="kpi-value" id="averageTicket">$0</div>
+                        <div class="kpi-change positive" id="ticketChange">+0%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Principal -->
+        <section class="charts-section">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-area"></i> Evolução da Receita</h3>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="revenueChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript otimizado -->
+    <script src="../WebDashboard/dashboard.js"></script>
+    <script>
+        // Configuração específica para Power BI
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remover funcionalidades desnecessárias
+            if (window.dashboard) {
+                // Desabilitar atualizações automáticas
+                clearInterval(window.dashboard.exchangeRateInterval);
+                
+                // Configurar para dados estáticos
+                window.dashboard.currency.current = 'USD';
+                
+                // Atualizar dados
+                window.dashboard.updateKPIs();
+                window.dashboard.createRevenueChart();
+            }
+        });
+    </script>
+</body>
+</html>
