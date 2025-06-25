@@ -1,0 +1,7 @@
+Year,Month,Month_Name,Revenue_BRL,Status,Methodology,Growth_Rate,Base_Calculation
+2022,7,Julho,5217889.12,Projeção,Media_Jul_2020_2021,0.0,Média((2547323.40+4271505.00)/2)
+2022,8,Agosto,5765693.01,Projeção,Crescimento_Sequencial,10.5,Jul_2022 * 1.105
+2022,9,Setembro,6370691.33,Projeção,Crescimento_Sequencial,10.5,Ago_2022 * 1.105
+2022,10,Outubro,7039413.67,Projeção,Crescimento_Sequencial,10.5,Set_2022 * 1.105
+2022,11,Novembro,7778562.16,Projeção,Crescimento_Sequencial,10.5,Out_2022 * 1.105
+2022,12,Dezembro,8595901.18,Projeção,Crescimento_Sequencial,10.5,Nov_2022 * 1.105

@@ -1,0 +1,10 @@
+Metric,Value_BRL,Change_Percent,Year,Status
+Receita_Total,130571800.88,82.5,2022,Com_Projeção
+Lucro_Total,54539153.17,85.2,2022,Com_Projeção
+Total_Pedidos,56046,12.3,2022,Com_Projeção
+Margem_Lucro,41.7,2.1,2022,Com_Projeção
+Ticket_Medio,2329.75,62.8,2022,Com_Projeção
+Receita_Real,48159815.04,0,2022,Sem_Projeção
+Lucro_Real,20098652.67,0,2022,Sem_Projeção
+Receita_Projetada,41767544.47,0,2022,Apenas_Projeção
+Lucro_Projetado,17440500.50,0,2022,Apenas_Projeção
