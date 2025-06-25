@@ -30,7 +30,7 @@ Dashboard interativo desenvolvido para análise financeira da Adventure Works, e
 
 ```bash
 # Clonar repositório
-git clone [repo-url]
+git clone https://github.com/alex-des-santos/Case-Analista-Dados.git
 
 # Abrir dashboard
 cd docs
