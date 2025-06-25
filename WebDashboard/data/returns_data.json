@@ -1,0 +1,13 @@
+{
+  "totalReturns": 765288.0,
+  "returnsByYear": {
+    "2020": 211621.0,
+    "2021": 276357.0,
+    "2022": 277310.0
+  },
+  "metadata": {
+    "total_records": 1809,
+    "total_quantity": 1828,
+    "average_price": 421.5444997236042
+  }
+}
