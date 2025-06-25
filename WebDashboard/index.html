@@ -39,13 +39,12 @@
                         <option value="2020">2020</option>
                     </select>
                     
-                    <div class="projection-controls">
-                        <label class="projection-toggle" title="Mostrar projeção para 2022">
+                    <div class="projection-controls" title="Ativar projeção para 2022">
+                        <label class="projection-toggle">
                             <input type="checkbox" id="projectionToggle">
                             <span class="projection-slider"></span>
-                            <span class="projection-label">Projeção 2022</span>
                         </label>
-                        <div id="projectionStatus" style="display: none;"></div>
+                        <span class="projection-label">Projeção 2022</span>
                     </div>
                     
                     <button id="refreshBtn" class="refresh-btn" title="Atualizar dados">
@@ -127,8 +126,12 @@
                             <button class="chart-btn" data-period="quarter">Trimestral</button>
                         </div>
                     </div>
-                    <div id="projectionInfo"></div>
                     <canvas id="revenueChart"></canvas>
+                    <div id="projectionDisclaimer" class="projection-disclaimer" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Projeção 2022:</strong> Dados de jul-dez são projetados com base em análise preditiva. 
+                        <span class="disclaimer-details">Metodologia: Tendência + Sazonalidade + Crescimento YoY</span>
+                    </div>
                 </div>
 
                 <!-- Top Products -->

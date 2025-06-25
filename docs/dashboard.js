@@ -48,11 +48,6 @@ class DashboardData {
           this.charts = {};
         this.currentPeriod = 'month';
         this.currentYear = 'all';
-        
-        // Controle de projeção
-        this.showProjection = false;
-        this.projectedData = null;
-        
         this.init();
     }    init() {
         this.updateKPIs();
@@ -109,8 +104,8 @@ class DashboardData {
         const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
                        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
         
-        // Get data based on current filters (with projection if enabled)
-        const currentYearData = this.showProjection ? this.getRevenueDataWithProjection() : this.getRevenueDataForChart();
+        // Get data based on current filters
+        const currentYearData = this.getRevenueDataForChart();
         
         this.charts.revenue = new Chart(ctx, {
             type: 'line',
@@ -138,18 +133,7 @@ class DashboardData {
                         borderWidth: 1,
                         callbacks: {
                             label: (context) => {
-                                const isProjected = context.dataset.label && context.dataset.label.includes('Projetado');
-                                const value = this.formatCurrency(this.convertCurrency(context.raw));
-                                
-                                if (isProjected && this.projectedData) {
-                                    return [
-                                        `${context.dataset.label}: ${value}`,
-                                        `Confiança: ${this.projectedData.metadata.confidence}%`,
-                                        'Baseado em: Análise sazonal + tendência'
-                                    ];
-                                }
-                                
-                                return `${context.dataset.label}: ${value}`;
+                                return `${context.dataset.label}: ${this.formatCurrency(this.convertCurrency(context.raw))}`;
                             }
                         }
                     }
@@ -528,14 +512,6 @@ class DashboardData {
             powerBIExportBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.exportPowerBIFile();
-            });
-        }
-
-        // Projection Toggle
-        const projectionToggle = document.getElementById('projectionToggle');
-        if (projectionToggle) {
-            projectionToggle.addEventListener('change', (e) => {
-                this.toggleProjection(e.target.checked);
             });
         }
 
@@ -1895,7 +1871,6 @@ Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString(
 // Initialize Dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.dashboard = new DashboardData();
-    
     
     // Add smooth scroll behavior
     document.documentElement.style.scrollBehavior = 'smooth';
