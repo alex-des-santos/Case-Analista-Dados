@@ -421,7 +421,6 @@ input:checked + .slider:before {
 
 .kpi-card.returns {
     background: white;
-    border: 2px solid #ff6b6b;
 }
 
 .kpi-card.returns .kpi-icon {
