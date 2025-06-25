@@ -672,6 +672,7 @@ canvas {
 .insight-icon.geographic { background: linear-gradient(135deg, #4299e1, #3182ce); }
 .insight-icon.customer { background: linear-gradient(135deg, #9f7aea, #805ad5); }
 .insight-icon.brazil { background: linear-gradient(135deg, #009739, #FEDD00); } /* Cores da bandeira do Brasil */
+.insight-icon.growth { background: linear-gradient(135deg, #28a745, #20c997); } /* Verde crescimento */
 
 .projection-card {
     border-left: 4px solid #009739;
@@ -679,14 +680,41 @@ canvas {
     box-shadow: 0 4px 15px rgba(0, 151, 57, 0.2);
 }
 
-.projection-card .insight-content h4 {
+.growth-card {
+    border-left: 4px solid #28a745;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.projection-card .insight-content h4,
+.growth-card .insight-content h4 {
     color: #009739;
     font-weight: 700;
 }
 
-.projection-card .insight-content strong {
+.projection-card .insight-content strong,
+.growth-card .insight-content strong {
     color: var(--primary-blue);
     font-size: 1.1em;
+}
+
+.projection-details {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.projection-details small {
+    color: #666;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+}
+
+.growth-indicator {
+    color: #28a745;
+    font-weight: 600;
 }
 
 /* Footer */
