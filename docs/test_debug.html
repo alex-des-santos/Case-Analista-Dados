@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>Debug Dashboard</h1>
+        <div id="debug-info"></div>
+        <div id="totalRevenue">$0</div>
+        <canvas id="revenueChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        // Teste de inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugInfo = document.getElementById('debug-info');
+            
+            // Verificar se Chart.js está disponível
+            if (typeof Chart !== 'undefined') {
+                debugInfo.innerHTML += '<p>✅ Chart.js carregado</p>';
+            } else {
+                debugInfo.innerHTML += '<p>❌ Chart.js não carregado</p>';
+            }
+            
+            // Verificar elementos DOM
+            const elements = ['totalRevenue', 'revenueChart'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    debugInfo.innerHTML += `<p>✅ Elemento ${id} encontrado</p>`;
+                } else {
+                    debugInfo.innerHTML += `<p>❌ Elemento ${id} não encontrado</p>`;
+                }
+            });
+            
+            // Teste de inicialização do dashboard
+            try {
+                window.dashboard = new DashboardData();
+                debugInfo.innerHTML += '<p>✅ Dashboard inicializado com sucesso</p>';
+            } catch (error) {
+                debugInfo.innerHTML += `<p>❌ Erro ao inicializar dashboard: ${error.message}</p>`;
+                console.error('Erro detalhado:', error);
+            }
+        });
+    </script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -111,6 +110,17 @@
                         <div class="kpi-change positive" id="ticketChange">+0%</div>
                     </div>
                 </div>
+
+                <div class="kpi-card returns">
+                    <div class="kpi-icon">
+                        <i class="fas fa-undo"></i>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Total de Devoluções</h3>
+                        <div class="kpi-value" id="totalReturns">US$ 0</div>
+                        <div class="kpi-change negative" id="returnsChange">0%</div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -129,8 +139,8 @@
                     <canvas id="revenueChart"></canvas>
                     <div id="projectionDisclaimer" class="projection-disclaimer" style="display: none;">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Projeção 2022:</strong> Dados de jul-dez são projetados com base em análise preditiva. 
-                        <span class="disclaimer-details">Metodologia: Tendência + Sazonalidade + Crescimento YoY</span>
+                        <strong>Projeção 2022:</strong> Dados de jul-dez são projetados com base em Machine Learning (Gradient Boosting). 
+                        <span class="disclaimer-details">Metodologia: Random Forest, Gradient Boosting e Linear Regression testados • R² Score: 0.466</span>
                     </div>
                 </div>
 
@@ -228,7 +238,6 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

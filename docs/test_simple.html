@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Teste Simples</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="totalRevenue">$0</div>
+    <div id="totalProfit">$0</div>
+    <div id="totalOrders">0</div>
+    <div id="profitMargin">0%</div>
+    <div id="averageTicket">$0</div>
+    <div id="totalReturns">$0</div>
+    <div id="returnsChange">0%</div>
+    
+    <canvas id="revenueChart" width="400" height="200"></canvas>
+    <canvas id="topProductsChart" width="400" height="200"></canvas>
+    <canvas id="territoryChart" width="400" height="200"></canvas>
+    <canvas id="categoryChart" width="400" height="200"></canvas>
+    
+    <div id="brazilProjection">Calculando...</div>
+    
+    <script>
+        console.log('=== TESTE DE INICIALIZAÇÃO DO DASHBOARD ===');
+        
+        // Aguardar carregamento completo
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Carregado');
+            
+            // Verificar Chart.js
+            console.log('Chart.js disponível:', typeof Chart !== 'undefined');
+            
+            // Carregar dashboard.js dinamicamente
+            const script = document.createElement('script');
+            script.src = 'dashboard.js';
+            script.onload = () => {
+                console.log('dashboard.js carregado');
+                
+                // Tentar inicializar
+                setTimeout(() => {
+                    try {
+                        console.log('Tentando inicializar DashboardData...');
+                        window.testDashboard = new DashboardData();
+                        console.log('✅ Dashboard inicializado com sucesso!');
+                    } catch (error) {
+                        console.error('❌ Erro ao inicializar dashboard:', error);
+                        console.error('Stack trace:', error.stack);
+                    }
+                }, 100);
+            };
+            script.onerror = () => {
+                console.error('❌ Erro ao carregar dashboard.js');
+            };
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

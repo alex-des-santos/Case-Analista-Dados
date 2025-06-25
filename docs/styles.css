@@ -419,6 +419,27 @@ input:checked + .slider:before {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
+.kpi-card.returns {
+    background: white;
+}
+
+.kpi-card.returns .kpi-icon {
+    background: #e9ecef;
+    color: #dc3545;
+}
+
+.kpi-card.returns .kpi-content h3 {
+    color: #333;
+}
+
+.kpi-card.returns .kpi-value {
+    color: #dc3545 !important;
+}
+
+.kpi-card.returns .kpi-change {
+    color: #dc3545 !important;
+}
+
 .kpi-icon {
     width: 65px;
     height: 65px;
@@ -592,7 +613,9 @@ input:checked + .slider:before {
 }
 
 canvas {
-    max-height: 300px;
+    min-height: 280px;
+    max-height: 400px;
+    width: 100%;
 }
 
 /* Insights Section */
