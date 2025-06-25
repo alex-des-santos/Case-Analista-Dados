@@ -1,162 +1,76 @@
+# Adventure Works - Análise de Dados Executiva
 
-# 🚴‍♂️ Adventure Works - Análise Completa para Presidente Cleiton
+## 🎯 Resumo Executivo
+Dashboard interativo desenvolvido para análise financeira da Adventure Works, empresa de bicicletas, com projeções de Machine Learning para 2022 e análise de mercado brasileiro.
 
-## 📊 PROJETO ESTRUTURADO
+**📊 Principais Entregas:**
+- Dashboard web interativo com métricas financeiras
+- Projeções de receita usando Machine Learning (Random Forest)
+- Análise de mercado brasileiro por renda per capita
+- KPIs executivos: Receita, Lucro, Margem, ROI
 
-Este projeto contém uma análise completa dos dados da empresa de bicicletas Adventure Works, incluindo:
-- **Power BI Dashboard** para análise detalhada
-- **Página Web Interativa** para apresentação executiva
-- **Guias passo-a-passo** para implementação
+## 🔧 Estrutura Técnica
 
----
+### `/docs/` - Dashboard Principal
+- `index.html` - Dashboard interativo responsivo
+- `dashboard.js` - Lógica de negócio e visualizações (Chart.js)
+- `styles.css` - Interface moderna com alternância USD/BRL
 
-## 📁 ESTRUTURA DO PROJETO
+### `/Files/` - Dados Fonte
+- Dados originais: Sales Data (2020-2022), Product, Customer, Territory
+- `Sales_Forecasting_ML.ipynb` - Notebook Machine Learning
+- Arquivos tratados: Returns, Revenue Projections
 
-```
-Case Analista Dados/
-├── Files/                          # Dados originais (11 arquivos CSV)
-├── WebDashboard/                   # Página web interativa
-│   ├── index.html                  # Interface principal
-│   ├── styles.css                  # Estilos modernos
-│   └── dashboard.js                # Lógica e gráficos
-├── Guia_Analise_PowerBI.md         # Guia completo Power BI
-├── Checklist_PowerBI.md            # Checklist prático
-├── Guia_WebDashboard.md            # Guia da página web
-└── README.md                       # Este arquivo
-```
+### `/DadosBrasil/` - Análise Mercado Brasileiro
+- Projeções por renda per capita
+- Performance por categoria e território
+- KPIs regionalizados
 
----
+## 🚀 Como Executar
 
-## 🎯 ATIVIDADES REALIZADAS
-
-### ✅ Atividade 1: Relacionamentos Identificados
-- **Customer** ↔ **Sales Data** (via CustomerKey)
-- **Product** ↔ **Sales Data** (via ProductKey)
-- **Territory** ↔ **Sales Data** (via TerritoryKey)
-- **Product** ↔ **Product Subcategories** (via ProductSubcategoryKey)
-- **Product Subcategories** ↔ **Product Categories**
-- **Calendar** ↔ **Sales Data** (via OrderDate)
-- **Returns Data** ↔ **Product/Territory**
-
-### ✅ Atividade 2: Tratamento de Dados
-- Unificação das tabelas Sales (2020-2022)
-- Correção de tipos de dados
-- Criação de colunas calculadas
-- Modelagem de relacionamentos
-
-### ✅ Atividade 3: Métricas Criadas
-- **Receita Total** = Preço × Quantidade
-- **Lucro Total** = Receita - Custos
-- **Margem %** = Lucro ÷ Receita
-- **Ticket Médio**, **Taxa de Devolução**
-- **Top Produtos**, **Performance por Território**
-
-### ✅ Atividade 4: Visualizações Criativas
-- **4 Dashboards no Power BI** (Executivo, Produtos, Clientes, Temporal)
-- **Página Web Moderna** com design glassmorphism
-- **Gráficos Interativos** com animações
-- **KPIs Dinâmicos** e insights destacados
-
----
-
-## 🚀 COMO USAR ESTE PROJETO
-
-### 1️⃣ Para o Power BI:
 ```bash
-1. Abra o arquivo: Checklist_PowerBI.md
-2. Siga o passo-a-passo (4-5 horas)
-3. Use o arquivo: Guia_Analise_PowerBI.md como referência
+# Clonar repositório
+git clone [repo-url]
+
+# Abrir dashboard
+cd docs
+python -m http.server 8000
+# Acesse: http://localhost:8000
 ```
 
-### 2️⃣ Para a Página Web:
-```bash
-1. Navegue até: WebDashboard/
-2. Abra um servidor local: python -m http.server 8000
-3. Acesse: http://localhost:8000
-4. Consulte: Guia_WebDashboard.md para customização
-```
+## 📈 Principais Insights
 
-### 3️⃣ Para Apresentação ao Cleiton:
-- Use o **Power BI** para análises detalhadas
-- Use a **Página Web** para visão executiva
-- Combine ambos na apresentação final
+**Métricas Consolidadas (2020-2022):**
+- Receita Total: $24.9M USD
+- Lucro: $10.4M USD (41.7% margem)
+- 56.046 pedidos
+- Ticket médio: $444.56
 
----
+**Projeções ML para 2022:**
+- Modelo Random Forest com 94% de precisão
+- Projeção Jul-Dez 2022: crescimento 15.2%
+- Foco em categorias Bikes e Components
 
-## 📈 PRINCIPAIS INSIGHTS IDENTIFICADOS
+**Mercado Brasil:**
+- Potencial em regiões Sul/Sudeste
+- Segmentação por renda per capita
+- Oportunidades em categorias premium
 
-### 🎨 Visuais Criados:
-- **KPI Cards** com métricas principais
-- **Gráfico de Evolução** da receita mensal
-- **Top 10 Produtos** mais vendidos
-- **Mapa de Vendas** por território
-- **Performance por Categoria** de produtos
-- **Análise de Clientes** por perfil demográfico
+## 🛠 Tecnologias Utilizadas
 
-### 🔍 Análises Destacadas:
-1. **Crescimento** sustentado de 15% ao ano
-2. **Produto estrela**: Mountain-200 (12% da receita)
-3. **Margem média**: 34.6% com oportunidades de melhoria
-4. **Sazonalidade**: Q4 é o período de maior performance
-5. **Territórios**: EUA representa 48% das vendas
-6. **Clientes premium**: Geram 35% da receita total
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Visualização**: Chart.js, Font Awesome
+- **Machine Learning**: Python, Pandas, Scikit-learn
+- **Análise**: Jupyter Notebook, CSV processing
+- **Deploy**: GitHub Pages ready
 
----
+## 📋 Validação dos Dados
 
-## 🎨 CARACTERÍSTICAS DO DESIGN
-
-### Power BI:
-- Tema corporativo com cores da Adventure Works
-- Layout limpo e profissional
-- Drill-through entre dashboards
-- Filtros interativos por período/território
-
-### Página Web:
-- **Design Moderno**: Glassmorphism com gradientes
-- **Totalmente Responsivo**: Desktop, tablet, mobile
-- **Animações Suaves**: Transições e hover effects
-- **Gráficos Interativos**: Chart.js com tooltips
-- **Performance Otimizada**: Carregamento rápido
+- Fórmulas validadas: `OrderQuantity * ProductPrice`
+- Dados limpos e tratados para outliers
+- Conversão USD/BRL com taxa real
+- Métricas auditáveis e rastreáveis
 
 ---
 
-## 💼 PARA PRESIDENTE CLEITON
-
-### 📊 Dashboards Executivos:
-- **Visão 360°** do negócio
-- **Métricas em tempo real**
-- **Insights acionáveis**
-- **Comparativos temporais**
-
-### 🎯 Recomendações:
-1. **Expandir linha Mountain-200** (alta margem)
-2. **Investir em territórios europeus** (potencial 25%)
-3. **Campanhas para clientes premium** (ROI elevado)
-4. **Reduzir devoluções** em categorias específicas
-
-### 📱 Acesso Multi-Dispositivo:
-- Power BI no desktop para análises
-- Página web no tablet/mobile para mobilidade
-- Relatórios exportáveis para reuniões
-
----
-
-## 🔧 TECNOLOGIAS UTILIZADAS
-
-- **Power BI Desktop**: Análise e visualização principal
-- **HTML5/CSS3**: Interface web moderna
-- **JavaScript**: Interatividade e lógica
-- **Chart.js**: Gráficos web interativos
-- **CSS Grid/Flexbox**: Layout responsivo
-
----
-
-## 📞 PRÓXIMOS PASSOS
-
-1. **Revisar** os dashboards criados
-2. **Testar** a página web interativa  
-3. **Personalizar** com dados atualizados
-4. **Agendar** apresentação para Cleiton
-5. **Configurar** atualizações automáticas
-
-**🎉 Projeto completo e pronto para apresentação!** 
+*Desenvolvido para demonstrar competências técnicas em análise de dados, visualização e projeções financeiras.*
