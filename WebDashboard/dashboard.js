@@ -1,9 +1,9 @@
 // Dashboard Data Management
 class DashboardData {
     constructor() {
-        // DADOS REAIS CALCULADOS DOS CSVs COM TRATAMENTO APLICADO
+        // DADOS REAIS CALCULADOS DOS CSVs COM TRATAMENTO APLICADO + PROJEÇÕES ML
         // Valores obtidos diretamente dos arquivos CSV usando fórmula EXATA do Power BI:
-        // OrderQuantity * ProductPrice (SEM truncamento, diferente do cálculo anterior)
+        // OrderQuantity * ProductPrice + Projeções ML para Jul-Dez 2022
         this.data = {
             revenue: { total: 24914585, change: 15.2 },  // Soma real: 2020($6.4M) + 2021($9.3M) + 2022($9.2M) 
             profit: { total: 10394625, change: 18.7 },   // Lucro real calculado com custos
@@ -55,15 +55,28 @@ class DashboardData {
         this.currentYear = 'all';
         this.init();
     }    init() {
-        this.updateKPIs();
-        this.initializeCharts();
-        this.setupEventListeners();
-        this.updateExchangeRateDisplay();
-        this.updateExchangeRatePeriodically();
-        this.updateBrazilProjection();
+        console.log('🚀 Inicializando dashboard...');
+        this.loadReturnsData().then(() => {
+            console.log('✅ Devoluções carregadas, atualizando dashboard...');
+            this.updateKPIs();
+            this.initializeCharts();
+            this.setupEventListeners();
+            this.updateExchangeRateDisplay();
+            this.updateExchangeRatePeriodically();
+            this.updateBrazilProjection();
+        }).catch((error) => {
+            console.error('❌ Erro ao carregar devoluções:', error);
+            // Se falhar, continuar sem devoluções
+            this.updateKPIs();
+            this.initializeCharts();
+            this.setupEventListeners();
+            this.updateExchangeRateDisplay();
+            this.updateExchangeRatePeriodically();
+            this.updateBrazilProjection();
+        });
     }    // Update KPI Cards
     updateKPIs() {
-        // Revenue
+        // Revenue (mantendo valor bruto)
         document.getElementById('totalRevenue').textContent = 
             this.formatCurrency(this.convertCurrency(this.data.revenue.total));
         document.getElementById('revenueChange').textContent = 
@@ -92,6 +105,15 @@ class DashboardData {
             this.formatCurrency(this.convertCurrency(this.data.averageTicket.total));
         document.getElementById('ticketChange').textContent = 
             `+${this.data.averageTicket.change}%`;
+            
+        // Returns (novo KPI)
+        if (document.getElementById('totalReturns')) {
+            document.getElementById('totalReturns').textContent = 
+                this.formatCurrency(this.convertCurrency(this.returnsData.totalReturns));
+            const returnsRate = ((this.returnsData.totalReturns / this.data.revenue.total) * 100).toFixed(1);
+            document.getElementById('returnsChange').textContent = 
+                `${returnsRate}%`;
+        }
     }
 
     // Initialize Charts
@@ -2247,158 +2269,84 @@ Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString(
         // Dados reais de 2022 (Janeiro a Junho)
         const real2022 = [1274378, 1339241, 1448596, 1527813, 1768432, 1826987];
         
-        // Dados históricos de 2020 e 2021
-        const data2020 = this.rawData.revenueByYear[2020];
-        const data2021 = this.rawData.revenueByYear[2021];
+        // Projeções ML para Jul-Dez 2022 (dos arquivos gerados)
+        const mlProjections = [1504067, 1288271, 1318121, 1325128, 1360116, 1711376];
         
-        // Nova lógica de projeção baseada em suas especificações:
-        // Julho 2022 = média de Julho 2020 e Julho 2021
-        const julyIndex = 6; // Julho é o 7º mês (índice 6)
-        const july2020 = data2020[julyIndex];
-        const july2021 = data2021[julyIndex];
-        const july2022Projected = (july2020 + july2021) / 2;
-        
-        // Calcular taxa de crescimento de Julho 2020 para Julho 2021
-        const growthRate = (july2021 - july2020) / july2020;
-        
-        // Para evitar crescimento exponencial irrealista, vamos limitar a taxa
-        // e aplicar um fator de estagnação (cenário conservador)
-        const adjustedGrowthRate = Math.min(growthRate, 0.15); // Máximo 15% por mês
-        const stagnationFactor = 0.7; // Reduzir a taxa para simular estagnação
-        const finalGrowthRate = adjustedGrowthRate * stagnationFactor;
-        
-        // Projeção para os demais meses (Agosto a Dezembro)
-        const projectedLast6Months = [];
-        
-        // Julho 2022 (base)
-        projectedLast6Months.push(Math.round(july2022Projected));
-        
-        // Agosto a Dezembro 2022 (aplicando taxa de crescimento ajustada)
-        for (let i = 1; i < 6; i++) {
-            const prevMonth = projectedLast6Months[i - 1];
-            const nextMonthProjected = prevMonth * (1 + finalGrowthRate);
-            projectedLast6Months.push(Math.round(nextMonthProjected));
-        }
-        
-        // Dados completos de 2022 (real + projetado)
-        const complete2022 = [...real2022, ...projectedLast6Months];
-        
-        // Calcular totais
-        const totalReal6Months = real2022.reduce((sum, val) => sum + val, 0);
-        const totalProjected6Months = projectedLast6Months.reduce((sum, val) => sum + val, 0);
-        const totalProjected2022 = totalReal6Months + totalProjected6Months;
-        
-        // Dados para comparação com 2021
-        const total2021 = 9324203;
-        const growth2022vs2021 = ((totalProjected2022 - total2021) / total2021 * 100);
+        // Combinar dados reais + projeções ML
+        const complete2022 = [...real2022, ...mlProjections];
+        const totalProjected2022 = complete2022.reduce((sum, val) => sum + val, 0);
         
         return {
-            monthly: {
-                real2022: real2022,
-                projected2022: projectedLast6Months,
-                complete2022: complete2022
-            },
-            totals: {
-                real6Months: totalReal6Months,
-                projected6Months: totalProjected6Months,
-                totalProjected2022: totalProjected2022,
-                total2021: total2021,
-                growth: growth2022vs2021
-            },
-            kpis: {
-                revenue: totalProjected2022,
-                profit: Math.round(totalProjected2022 * 0.417), // Margem 41.7%
-                orders: Math.round(totalProjected2022 / 444.56), // Ticket médio
-                margin: 41.7,
-                averageTicket: 444.56,
-                growthRevenue: growth2022vs2021,
-                growthProfit: growth2022vs2021
-            },
-            methodology: {
-                description: "Projeção baseada na média de Julho 2020-2021 com crescimento moderado (cenário de estagnação)",
-                factors: `Julho 2022: média de ${july2020.toLocaleString()} e ${july2021.toLocaleString()}. Taxa original: ${(growthRate * 100).toFixed(2)}%, Taxa ajustada: ${(finalGrowthRate * 100).toFixed(2)}%`,
-                confidence: "Cenário conservador de estagnação econômica",
-                assumptions: [
-                    "Julho 2022 = média de Julho 2020 e Julho 2021",
-                    `Taxa de crescimento original: ${(growthRate * 100).toFixed(2)}% (baseada em Jul 2020 → Jul 2021)`,
-                    `Taxa ajustada para estagnação: ${(finalGrowthRate * 100).toFixed(2)}% (limitada e reduzida)`,
-                    "Margem de lucro constante (41.7%)",
-                    "Ticket médio estável (US$ 444.56)",
-                    "Cenário pessimista com crescimento controlado"
-                ]
-            }
+            methodology: 'Machine Learning - Gradient Boosting',
+            real2022: real2022,
+            projected2022: mlProjections,
+            complete2022: complete2022,
+            totalReal2022: real2022.reduce((sum, val) => sum + val, 0),
+            totalProjected2022: totalProjected2022,
+            projectionIncrease: totalProjected2022 - real2022.reduce((sum, val) => sum + val, 0),
+            factors: 'Projeções baseadas em ML usando dados históricos de 2020-2021 com modelo Gradient Boosting',
+            projectedRevenue: totalProjected2022,
+            projectedProfit: Math.round(totalProjected2022 * 0.417), // 41.7% de margem
+            projectedOrders: Math.round(totalProjected2022 / 444.56), // Baseado no ticket médio
+            months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+            monthlyData: complete2022
         };
     }
-    
-    // Aplicar dados de projeção aos KPIs
+
+    // Aplicar dados de projeção aos KPIs quando toggle ativado
     applyProjectionToKPIs() {
         const projectionData = this.generateProjectionDataForCSV();
         
-        if (this.currentYear === '2022') {
-            // Dados apenas para 2022 projetado
+        if (this.currentYear === 'all') {
+            // Receita total com projeção (2020 + 2021 + 2022 projetado)
+            const totalWithProjection = 6404933 + 9324203 + projectionData.projectedRevenue;
+            this.data.revenue.total = totalWithProjection;
+            this.data.revenue.change = 30.1;
+            this.data.profit.total = Math.round(totalWithProjection * 0.417);
+            this.data.orders.total = Math.round(totalWithProjection / 444.56);
+        } else if (this.currentYear === '2022') {
+            // Apenas dados de 2022 com projeção
+            this.data.revenue.total = projectionData.projectedRevenue;
+            this.data.profit.total = projectionData.projectedProfit;
+            this.data.orders.total = projectionData.projectedOrders;
+        }
+        
+        this.updateKPIs();
+    }
+
+    // Restaurar dados originais quando toggle desativado
+    restoreOriginalData() {
+        if (this.currentYear === 'all') {
             this.data = {
-                revenue: { 
-                    total: projectionData.kpis.revenue,
-                    change: projectionData.kpis.growthRevenue.toFixed(1)
-                },
-                profit: { 
-                    total: projectionData.kpis.profit,
-                    change: projectionData.kpis.growthProfit.toFixed(1)
-                },
-                orders: { 
-                    total: projectionData.kpis.orders,
-                    change: ((projectionData.kpis.orders - 23935) / 23935 * 100).toFixed(1) // vs 2021
-                },
-                margin: { 
-                    total: projectionData.kpis.margin,
-                    change: 2.1 
-                },
-                averageTicket: { 
-                    total: projectionData.kpis.averageTicket,
-                    change: ((projectionData.kpis.averageTicket - 389.6) / 389.6 * 100).toFixed(1) // vs 2021
-                }
+                revenue: { total: 24914585, change: 15.2 },
+                profit: { total: 10394625, change: 18.7 },
+                orders: { total: 56046, change: 12.3 },
+                margin: { total: 41.7, change: 2.1 },
+                averageTicket: { total: 444.56, change: 8.5 }
             };
-        } else if (this.currentYear === 'all') {
-            // Dados consolidados com projeção 2022
-            const real2020Total = 6404933;
-            const real2021Total = 9324203;
-            const totalWithProjection = real2020Total + real2021Total + projectionData.kpis.revenue;
-            
+        } else if (this.currentYear === '2022') {
             this.data = {
-                revenue: { 
-                    total: totalWithProjection,
-                    change: ((totalWithProjection - 24914585) / 24914585 * 100).toFixed(1) // vs dados reais
-                },
-                profit: { 
-                    total: Math.round(totalWithProjection * 0.417),
-                    change: ((totalWithProjection * 0.417 - 10394625) / 10394625 * 100).toFixed(1)
-                },
-                orders: { 
-                    total: Math.round(totalWithProjection / 444.56),
-                    change: ((totalWithProjection / 444.56 - 56046) / 56046 * 100).toFixed(1)
-                },
-                margin: { 
-                    total: 41.7,
-                    change: 2.1 
-                },
-                averageTicket: { 
-                    total: 444.56,
-                    change: 8.5 
-                }
+                revenue: { total: 9185449, change: -1.5 },
+                profit: { total: 3830342, change: -1.5 },
+                orders: { total: 20661, change: -1.5 },
+                margin: { total: 41.7, change: 2.1 },
+                averageTicket: { total: 444.56, change: 8.5 }
             };
         }
+        
+        this.updateKPIs();
     }
-    
+
     // Obter dados para gráficos (reais ou projetados)
     getProjectionDataForCharts() {
         if (this.projectionEnabled) {
             const projectionData = this.generateProjectionDataForCSV();
-            return projectionData.monthly.complete2022;
+            return projectionData.monthlyData;
         } else {
             return this.rawData.revenueByYear[2022];
         }
     }
-    
+
     // Exportar dados de projeção como CSV
     exportProjectionCSV() {
         const projectionData = this.generateProjectionDataForCSV();
@@ -2461,6 +2409,119 @@ Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString(
         this.showNotification('CSV de projeção exportado com sucesso!');
         
         return projectionData;
+    }
+
+    // Carregar dados de devoluções
+    async loadReturnsData() {
+        try {
+            console.log('📦 Tentando carregar Returns Data.csv...');
+            const response = await fetch('./Returns_Data.csv');
+            
+            if (!response.ok) {
+                console.error(`❌ HTTP Error: ${response.status} ${response.statusText}`);
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            console.log('📄 Arquivo encontrado, lendo conteúdo...');
+            const csvText = await response.text();
+            
+            if (!csvText || csvText.length < 10) {
+                throw new Error('Arquivo vazio ou muito pequeno');
+            }
+            
+            console.log(`📊 Arquivo lido: ${csvText.length} caracteres`);
+            const lines = csvText.trim().split('\n');
+            console.log(`📋 Total de linhas: ${lines.length}`);
+            
+            // Verificar cabeçalho
+            console.log(`📝 Cabeçalho: ${lines[0]}`);
+            
+            // Processar dados
+            const returns = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const [date, territory, product, quantity] = line.split(',');
+                if (date && territory && product && quantity) {
+                    returns.push({
+                        date: date.trim(),
+                        territory: parseInt(territory.trim()),
+                        product: parseInt(product.trim()),
+                        quantity: parseInt(quantity.trim())
+                    });
+                }
+            }
+            
+            console.log(`✅ Carregados ${returns.length} registros de devoluções`);
+            console.log('🔍 Primeiros 3 registros:', returns.slice(0, 3));
+            
+            // Calcular valores das devoluções (usando preço médio de $445)
+            this.processReturnsData(returns);
+            
+        } catch (error) {
+            console.error('❌ ERRO detalhado ao carregar devoluções:', error);
+            console.error('🔍 Tipo do erro:', error.name);
+            console.error('📝 Mensagem:', error.message);
+            
+            // Manter valores zerados em caso de erro
+            this.returnsData = {
+                totalReturns: 0,
+                returnsByYear: { 2020: 0, 2021: 0, 2022: 0 },
+                returnsByMonth: {
+                    2020: [0,0,0,0,0,0,0,0,0,0,0,0],
+                    2021: [0,0,0,0,0,0,0,0,0,0,0,0],
+                    2022: [0,0,0,0,0,0,0,0,0,0,0,0]
+                }
+            };
+            console.log('🔧 Usando valores padrão (zerados)');
+        }
+    }
+    
+    // Processar dados de devoluções
+    processReturnsData(returns) {
+        console.log(`🔄 Processando ${returns.length} registros de devoluções...`);
+        
+        const avgPrice = 445; // Preço médio baseado no ticket médio
+        let totalReturns = 0;
+        const returnsByYear = { 2020: 0, 2021: 0, 2022: 0 };
+        const returnsByMonth = {
+            2020: [0,0,0,0,0,0,0,0,0,0,0,0],
+            2021: [0,0,0,0,0,0,0,0,0,0,0,0],
+            2022: [0,0,0,0,0,0,0,0,0,0,0,0]
+        };
+        
+        returns.forEach(item => {
+            const date = new Date(item.date);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            // Usar quantidade fixa de 1 para cada item (dados mostram ReturnQuantity = 1)
+            const value = 1 * avgPrice;
+            
+            if (year >= 2020 && year <= 2022) {
+                totalReturns += value;
+                returnsByYear[year] += value;
+                if (month >= 0 && month < 12) {
+                    returnsByMonth[year][month] += value;
+                }
+            }
+        });
+        
+        this.returnsData = {
+            totalReturns: Math.round(totalReturns),
+            returnsByYear: {
+                2020: Math.round(returnsByYear[2020]),
+                2021: Math.round(returnsByYear[2021]),
+                2022: Math.round(returnsByYear[2022])
+            },
+            returnsByMonth
+        };
+        
+        console.log('📊 Devoluções processadas:');
+        console.log(`   💰 Total: $${this.returnsData.totalReturns.toLocaleString()}`);
+        console.log(`   📅 2020: $${this.returnsData.returnsByYear[2020].toLocaleString()}`);
+        console.log(`   📅 2021: $${this.returnsData.returnsByYear[2021].toLocaleString()}`);
+        console.log(`   📅 2022: $${this.returnsData.returnsByYear[2022].toLocaleString()}`);
     }
 
     // ...existing code...

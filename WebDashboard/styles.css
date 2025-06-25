@@ -419,6 +419,14 @@ input:checked + .slider:before {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
+.kpi-card.returns {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.kpi-card.returns .kpi-icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .kpi-icon {
     width: 65px;
     height: 65px;
