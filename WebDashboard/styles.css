@@ -420,11 +420,25 @@ input:checked + .slider:before {
 }
 
 .kpi-card.returns {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    background: white;
+    border: 2px solid #ff6b6b;
 }
 
 .kpi-card.returns .kpi-icon {
-    background: rgba(255, 255, 255, 0.2);
+    background: #e9ecef;
+    color: #dc3545;
+}
+
+.kpi-card.returns .kpi-content h3 {
+    color: #333;
+}
+
+.kpi-card.returns .kpi-value {
+    color: #dc3545 !important;
+}
+
+.kpi-card.returns .kpi-change {
+    color: #dc3545 !important;
 }
 
 .kpi-icon {
