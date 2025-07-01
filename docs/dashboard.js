@@ -2022,29 +2022,37 @@ class DashboardData {
                         {
                             type: "Line Chart",
                             title: "Evolução da Receita",
-                            axis: "monthly_revenue[year_month]",
-                            values: "Receita Total",
+                            fields: {
+                                sharedAxis: "monthly_revenue[year_month]",
+                                columnValues: "Receita Total"
+                            },
                             position: { x: 0, y: 120, width: 500, height: 300 }
                         },
                         {
-                            type: "Bar Chart",
+                            type: "Horizontal Bar Chart",
                             title: "Top Produtos",
-                            axis: "top_products[product_name]",
-                            values: "Receita por Produto",
+                            fields: {
+                                axis: "top_products[product_name]",
+                                values: "top_products[sales_value]"
+                            },
                             position: { x: 520, y: 120, width: 480, height: 300 }
                         },
                         {
                             type: "Donut Chart",
                             title: "Vendas por Território",
-                            legend: "territory_sales[territory_name]", 
-                            values: "Receita por Território",
+                            fields: {
+                                legend: "territory_sales[territory_name]",
+                                values: "territory_sales[sales_value]"
+                            },
                             position: { x: 0, y: 440, width: 300, height: 250 }
                         },
                         {
-                            type: "Clustered Bar Chart",
+                            type: "Clustered Column Chart",
                             title: "Performance por Categoria",
-                            axis: "category_performance[category_name]",
-                            values: ["Receita Total", "Lucro Total"],
+                            fields: {
+                                axis: "category_performance[category_name]",
+                                values: ["category_performance[revenue]", "category_performance[profit]"]
+                            },
                             position: { x: 320, y: 440, width: 680, height: 250 }
                         }
                     ]
@@ -2317,20 +2325,20 @@ Crie 5 cartões na parte superior:
 
 #### Gráficos Principais
 1. **Gráfico de Linhas** - Evolução da Receita
-   - Eixo: monthly_revenue[year_month]
-   - Valores: Receita Total
+   - **Eixo X (Shared Axis)**: monthly_revenue[year_month]
+   - **Eixo Y (Column values)**: Receita Total (medida DAX)
    
-2. **Gráfico de Barras** - Top Produtos
-   - Eixo: top_products[product_name]
-   - Valores: top_products[sales_value]
+2. **Gráfico de Barras Horizontais** - Top Produtos
+   - **Eixo Y (Axis)**: top_products[product_name]
+   - **Eixo X (Values)**: top_products[sales_value]
    
 3. **Gráfico de Rosca** - Vendas por Território
-   - Legenda: territory_sales[territory_name]
-   - Valores: territory_sales[sales_value]
+   - **Legenda (Legend)**: territory_sales[territory_name]
+   - **Valores (Values)**: territory_sales[sales_value]
    
-4. **Gráfico de Barras Agrupadas** - Performance por Categoria
-   - Eixo: category_performance[category_name]
-   - Valores: category_performance[revenue], category_performance[profit]
+4. **Gráfico de Colunas Agrupadas** - Performance por Categoria
+   - **Eixo X (Axis)**: category_performance[category_name]
+   - **Eixo Y (Values)**: category_performance[revenue], category_performance[profit]
 
 ### Passo 5: Aplicar Formatação
 
@@ -2350,6 +2358,29 @@ Crie 5 cartões na parte superior:
    - Ano (monthly_revenue[year])
    - Território (territory_sales[territory_name])
    - Categoria (category_performance[category_name])
+
+## ⚙️ Campos Corretos do Power BI
+
+**IMPORTANTE:** Use os campos exatos conforme aparecem no Power BI Desktop:
+
+### Gráfico de Linhas
+- **Shared Axis (Eixo Compartilhado)**: monthly_revenue[year_month]
+- **Column values (Valores da Coluna)**: Receita Total (medida DAX)
+
+### Gráfico de Barras Horizontais  
+- **Axis (Eixo)**: top_products[product_name]
+- **Values (Valores)**: top_products[sales_value]
+
+### Gráfico de Rosca
+- **Legend (Legenda)**: territory_sales[territory_name]
+- **Values (Valores)**: territory_sales[sales_value]
+
+### Gráfico de Colunas Agrupadas
+- **Axis (Eixo)**: category_performance[category_name]  
+- **Values (Valores)**: category_performance[revenue], category_performance[profit]
+
+### Cartões (Cards)
+- **Fields (Campos)**: Apenas arraste a medida DAX (ex: Receita Total)
 
 ## 🔧 Configurações Avançadas
 
