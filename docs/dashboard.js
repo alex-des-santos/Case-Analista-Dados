@@ -1911,46 +1911,70 @@ class DashboardData {
             
             // 2. MEDIDAS DAX (para copiar no Power BI)
             daxMeasures: {
-                // Medidas principais
+                // Medidas principais baseadas nos CSVs exportados
                 primary_measures: [
                     {
                         name: "Receita Total",
-                        dax: "Receita Total = SUMX(fat_Sales_Data, fat_Sales_Data[OrderQuantity] * RELATED(fat_Product[ProductPrice]))",
-                        description: "Fórmula exata usada no Power BI original"
+                        dax: "Receita Total = SUM(monthly_revenue[revenue])",
+                        description: "Soma da receita mensal dos dados exportados"
                     },
                     {
                         name: "Lucro Total", 
-                        dax: "Lucro Total = [Receita Total] - SUMX(fat_Sales_Data, fat_Sales_Data[OrderQuantity] * RELATED(fat_Product[ProductCost]))",
-                        description: "Lucro calculado com base nos custos reais"
+                        dax: "Lucro Total = SUM(category_performance[profit])",
+                        description: "Lucro calculado com base na performance por categoria"
                     },
                     {
                         name: "Margem de Lucro",
                         dax: "Margem de Lucro = DIVIDE([Lucro Total], [Receita Total], 0) * 100",
-                        description: "Margem percentual"
+                        description: "Margem percentual calculada"
                     },
                     {
                         name: "Ticket Médio",
-                        dax: "Ticket Médio = DIVIDE([Receita Total], COUNTROWS(fat_Sales_Data))",
-                        description: "Receita média por transação"
+                        dax: "Ticket Médio = DIVIDE([Receita Total], [Total de Pedidos])",
+                        description: "Receita média por pedido"
                     },
                     {
                         name: "Total de Pedidos",
-                        dax: "Total de Pedidos = COUNTROWS(fat_Sales_Data)",
-                        description: "Contagem total de registros de vendas"
+                        dax: "Total de Pedidos = SUMX(kpi_metrics, IF(kpi_metrics[metric_name] = \"Total de Pedidos\", kpi_metrics[metric_value], 0))",
+                        description: "Total de pedidos da tabela KPI"
                     }
                 ],
                 
-                // Medidas auxiliares
+                // Medidas auxiliares baseadas nos dados disponíveis
                 auxiliary_measures: [
                     {
-                        name: "Receita Anterior",
-                        dax: "Receita Anterior = CALCULATE([Receita Total], PREVIOUSYEAR(fat_Sales_Data[OrderDate]))",
-                        description: "Para cálculo de variação"
+                        name: "Receita por Território",
+                        dax: "Receita por Território = SUM(territory_sales[sales_value])",
+                        description: "Receita total por território"
                     },
                     {
-                        name: "Crescimento Receita",
-                        dax: "Crescimento Receita = DIVIDE([Receita Total] - [Receita Anterior], [Receita Anterior], 0) * 100",
-                        description: "Crescimento percentual year-over-year"
+                        name: "Receita por Produto",
+                        dax: "Receita por Produto = SUM(top_products[sales_value])",
+                        description: "Receita total por produto"
+                    },
+                    {
+                        name: "Margem por Categoria",
+                        dax: "Margem por Categoria = AVERAGE(category_performance[margin])",
+                        description: "Margem média por categoria de produto"
+                    }
+                ],
+                
+                // Medidas de análise temporal
+                time_intelligence: [
+                    {
+                        name: "Receita Ano Atual",
+                        dax: "Receita Ano Atual = CALCULATE([Receita Total], YEAR(monthly_revenue[year]) = YEAR(TODAY()))",
+                        description: "Receita do ano atual"
+                    },
+                    {
+                        name: "Crescimento YoY",
+                        dax: "Crescimento YoY = DIVIDE([Receita Ano Atual] - [Receita Ano Anterior], [Receita Ano Anterior], 0) * 100",
+                        description: "Crescimento year-over-year"
+                    },
+                    {
+                        name: "Receita Ano Anterior",
+                        dax: "Receita Ano Anterior = CALCULATE([Receita Total], YEAR(monthly_revenue[year]) = YEAR(TODAY())-1)",
+                        description: "Receita do ano anterior para comparação"
                     }
                 ]
             },
@@ -1998,28 +2022,28 @@ class DashboardData {
                         {
                             type: "Line Chart",
                             title: "Evolução da Receita",
-                            axis: "fat_Sales_Data[OrderDate]",
+                            axis: "monthly_revenue[year_month]",
                             values: "Receita Total",
                             position: { x: 0, y: 120, width: 500, height: 300 }
                         },
                         {
                             type: "Bar Chart",
                             title: "Top Produtos",
-                            axis: "fat_Product[ProductName]",
-                            values: "Receita Total",
+                            axis: "top_products[product_name]",
+                            values: "Receita por Produto",
                             position: { x: 520, y: 120, width: 480, height: 300 }
                         },
                         {
                             type: "Donut Chart",
                             title: "Vendas por Território",
-                            legend: "Territory[TerritoryName]", 
-                            values: "Receita Total",
+                            legend: "territory_sales[territory_name]", 
+                            values: "Receita por Território",
                             position: { x: 0, y: 440, width: 300, height: 250 }
                         },
                         {
                             type: "Clustered Bar Chart",
                             title: "Performance por Categoria",
-                            axis: "ProductCategory[CategoryName]",
+                            axis: "category_performance[category_name]",
                             values: ["Receita Total", "Lucro Total"],
                             position: { x: 320, y: 440, width: 680, height: 250 }
                         }
@@ -2050,25 +2074,38 @@ class DashboardData {
                 }
             },
             
-            // 5. RELACIONAMENTOS SUGERIDOS (caso precise criar)
+            // 5. RELACIONAMENTOS SUGERIDOS (entre as tabelas CSV exportadas)
             relationships: [
                 {
-                    from: "fat_Sales_Data[ProductKey]",
-                    to: "fat_Product[ProductKey]", 
-                    type: "Many-to-One",
-                    crossFilter: "Single"
+                    note: "As tabelas exportadas são agregadas e não requerem relacionamentos complexos",
+                    suggestions: [
+                        "monthly_revenue e kpi_metrics podem ser usadas independentemente",
+                        "territory_sales e category_performance são tabelas de dimensão",
+                        "top_products contém dados agregados por produto"
+                    ]
                 },
                 {
-                    from: "fat_Sales_Data[CustomerKey]",
-                    to: "Customer[CustomerKey]",
-                    type: "Many-to-One", 
-                    crossFilter: "Single"
-                },
-                {
-                    from: "fat_Sales_Data[TerritoryKey]",
-                    to: "Territory[TerritoryKey]",
-                    type: "Many-to-One",
-                    crossFilter: "Single"
+                    alternative: "Se usar dados originais dos arquivos CSV da pasta Files/",
+                    relationships: [
+                        {
+                            from: "Sales Data 2020-2022[ProductKey]",
+                            to: "Product[ProductKey]", 
+                            type: "Many-to-One",
+                            crossFilter: "Single"
+                        },
+                        {
+                            from: "Sales Data 2020-2022[CustomerKey]",
+                            to: "Customer[CustomerKey]",
+                            type: "Many-to-One", 
+                            crossFilter: "Single"
+                        },
+                        {
+                            from: "Sales Data 2020-2022[TerritoryKey]",
+                            to: "Territory[TerritoryKey]",
+                            type: "Many-to-One",
+                            crossFilter: "Single"
+                        }
+                    ]
                 }
             ]
         };
@@ -2542,11 +2579,21 @@ Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString(
                     <i class="fas fa-lightbulb"></i> Dicas Importantes:
                 </h4>
                 <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
-                    <li>Os valores foram calculados com a fórmula exata: <strong>OrderQuantity × ProductPrice</strong></li>
-                    <li>Use o arquivo JSON como referência completa da estrutura</li>
-                    <li>Mantenha os relacionamentos entre as tabelas existentes</li>
-                    <li>Configure filtros de data para análise temporal</li>
+                    <li>As medidas DAX foram <strong>corrigidas</strong> para usar os nomes das tabelas CSV exportadas</li>
+                    <li>Tabelas principais: <strong>monthly_revenue</strong>, <strong>kpi_metrics</strong>, <strong>category_performance</strong></li>
+                    <li>Use as medidas DAX exatamente como estão - já estão ajustadas para os dados exportados</li>
+                    <li>Configure filtros de data usando a coluna <strong>year_month</strong> da tabela monthly_revenue</li>
                 </ul>
+            </div>
+            
+            <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                <h4 style="color: #0c5460; margin: 0 0 10px 0;">
+                    <i class="fas fa-exclamation-triangle"></i> ✅ PROBLEMA CORRIGIDO:
+                </h4>
+                <p style="margin: 0; color: #0c5460; line-height: 1.6;">
+                    <strong>Antes:</strong> As medidas DAX referenciavam tabelas inexistentes (fat_Sales_Data, fat_Product)<br>
+                    <strong>Agora:</strong> Todas as medidas DAX foram ajustadas para usar as tabelas CSV exportadas corretamente.
+                </p>
             </div>
             
             <div style="text-align: center; margin-top: 25px;">
