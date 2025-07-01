@@ -2023,8 +2023,8 @@ class DashboardData {
                             type: "Line Chart",
                             title: "Evolução da Receita",
                             fields: {
-                                sharedAxis: "monthly_revenue[year_month]",
-                                columnValues: "Receita Total"
+                                axis: "monthly_revenue[year_month]",
+                                values: "Receita Total"
                             },
                             position: { x: 0, y: 120, width: 500, height: 300 }
                         },
@@ -2325,16 +2325,16 @@ Crie 5 cartões na parte superior:
 
 #### Gráficos Principais
 1. **Gráfico de Linhas** - Evolução da Receita
-   - **Eixo X (Shared Axis)**: monthly_revenue[year_month]
-   - **Eixo Y (Column values)**: Receita Total (medida DAX)
+   - **Eixo X (Axis)**: monthly_revenue[year_month]
+   - **Eixo Y (Values)**: Receita Total (medida DAX)
    
 2. **Gráfico de Barras Horizontais** - Top Produtos
    - **Eixo Y (Axis)**: top_products[product_name]
    - **Eixo X (Values)**: top_products[sales_value]
    
 3. **Gráfico de Rosca** - Vendas por Território
-   - **Legenda (Legend)**: territory_sales[territory_name]
-   - **Valores (Values)**: territory_sales[sales_value]
+   - **Legend (Legenda)**: territory_sales[territory_name]
+   - **Values (Valores)**: territory_sales[sales_value]
    
 4. **Gráfico de Colunas Agrupadas** - Performance por Categoria
    - **Eixo X (Axis)**: category_performance[category_name]
@@ -2364,20 +2364,20 @@ Crie 5 cartões na parte superior:
 **IMPORTANTE:** Use os campos exatos conforme aparecem no Power BI Desktop:
 
 ### Gráfico de Linhas
-- **Shared Axis (Eixo Compartilhado)**: monthly_revenue[year_month]
-- **Column values (Valores da Coluna)**: Receita Total (medida DAX)
+- **Eixo X (Axis)**: monthly_revenue[year_month]
+- **Eixo Y (Values)**: Receita Total (medida DAX)
 
 ### Gráfico de Barras Horizontais  
-- **Axis (Eixo)**: top_products[product_name]
-- **Values (Valores)**: top_products[sales_value]
+- **Eixo Y (Axis)**: top_products[product_name]
+- **Eixo X (Values)**: top_products[sales_value]
 
 ### Gráfico de Rosca
 - **Legend (Legenda)**: territory_sales[territory_name]
 - **Values (Valores)**: territory_sales[sales_value]
 
 ### Gráfico de Colunas Agrupadas
-- **Axis (Eixo)**: category_performance[category_name]  
-- **Values (Valores)**: category_performance[revenue], category_performance[profit]
+- **Eixo X (Axis)**: category_performance[category_name]  
+- **Eixo Y (Values)**: category_performance[revenue], category_performance[profit]
 
 ### Cartões (Cards)
 - **Fields (Campos)**: Apenas arraste a medida DAX (ex: Receita Total)
